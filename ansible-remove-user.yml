@@ -1,0 +1,9 @@
+---
+- hosts: all
+  become: yes
+  tasks:
+  - name: Add user to remote hosts
+    ansible.builtin.user:
+      name: ansible-admin
+      state: absent
+      remove: yes
