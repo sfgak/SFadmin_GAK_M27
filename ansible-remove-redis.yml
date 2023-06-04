@@ -1,0 +1,13 @@
+---
+   - hosts: adduser
+     become: true
+     become_method: sudo
+     tasks:
+       - name: "Remove redis"
+         apt:
+               force_apt_get: true
+               name:
+                       - redis-server
+                       - redis
+                       - redis-tools
+               state: absent

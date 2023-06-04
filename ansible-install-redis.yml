@@ -1,0 +1,23 @@
+---
+   - hosts: adduser
+     become: true
+     become_method: sudo
+     tasks:
+       - name: "Install redis"
+         apt:
+               update_cache: true
+               cache_valid_time: 86400
+               force_apt_get: true
+               name:
+                       - redis
+               state: present
+               install-recommends: yes
+
+       - name: "Redis systemd"
+         systemd:
+               name: redis
+               # Value of "enabled" must be one of: yes, no
+               enabled: yes
+               # Value of "state" must be one of: reloaded, restarted, started, stopped
+               state: restarted
+

@@ -1,0 +1,52 @@
+---
+   - hosts: adduser
+     become: true
+     become_method: sudo
+     tasks:
+       - name: "Download zabbix repository"
+         ansible.builtin.get_url:
+                 url: https://repo.zabbix.com/zabbix/5.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_5.0-1+focal_all.deb
+                 dest: /root/zabbix-release_5.0-1+focal_all.deb
+                 mode: 0644
+
+       - name: "Ubuntu install zabbix repository"
+         apt: deb="/root/zabbix-release_5.0-1+focal_all.deb"
+
+       - name: "Ubuntu install zabbix-agent"
+         apt:
+               update_cache: true
+               cache_valid_time: 86400
+               force_apt_get: true
+               name:
+                       - zabbix-agent
+               state: present
+               install-recommends: yes
+
+       - name: "Setting zabbix-server in zabbix-agent config"
+         ansible.builtin.lineinfile:
+                 path: /etc/zabbix/zabbix_agentd.conf
+                 regexp: '^ServerActive\='
+                 #line: Server=epdiflqj91uo4elobtfe.auto.internal
+                 line: ServerActive=10.128.0.31
+
+       - name: "Setting zabbix-server in zabbix-agent config"
+         ansible.builtin.lineinfile:
+                 path: /etc/zabbix/zabbix_agentd.conf
+                 regexp: '^Server\='
+                 #line: Server=epdiflqj91uo4elobtfe.auto.internal
+                 line: Server=10.128.0.31
+
+       - name: "Setting hostname in zabbix-agent config"
+         ansible.builtin.lineinfile:
+                 path: /etc/zabbix/zabbix_agentd.conf
+                 regexp: '^\# Hostname\='
+                 line: Hostname=system.uname
+
+       - name: zabbix-agent systemd
+         systemd:
+               name: zabbix-agent
+               # Value of "enabled" must be one of: yes, no
+               enabled: yes
+               # Value of "state" must be one of: reloaded, restarted, started, stopped
+               state: restarted
+
